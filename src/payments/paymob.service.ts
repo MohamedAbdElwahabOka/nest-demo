@@ -23,6 +23,10 @@ export class PaymobService {
       body: JSON.stringify({ api_key: this.apiKey }),
     });
     const data = await response.json() as any;
+    if (!data.token) {
+      console.error('Paymob Auth Error:', data);
+      throw new Error('Failed to authenticate with Paymob');
+    }
     return data.token;
   }
 
@@ -39,7 +43,12 @@ export class PaymobService {
         items: [],
       }),
     });
-    return response.json();
+    const data = await response.json() as any;
+    if (!data.id) {
+      console.error('Paymob Order Error:', data);
+      throw new Error('Failed to create order in Paymob');
+    }
+    return data;
   }
 
   // Step 3: Get the payment key for charging
@@ -70,10 +79,14 @@ export class PaymobService {
           country: 'NA', shipping_method: 'NA', postal_code: 'NA',
         },
         currency: 'EGP',
-        integration_id: this.integrationId,
+        integration_id: Number(this.integrationId),
       }),
     });
     const data = await response.json() as any;
+    if (!data.token) {
+      console.error('Paymob PaymentKey Error:', data);
+      throw new Error('Failed to get payment key from Paymob');
+    }
     return data.token;
   }
 

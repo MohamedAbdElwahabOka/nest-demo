@@ -89,7 +89,7 @@ export class PaymentsController {
 
     return {
       paymentKey,
-      iframeUrl: `https://accept.paymob.com/api/acceptance/iframes/${paymentKey}`,
+      iframeUrl: `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentKey}`,
     };
   }
 
