@@ -2,6 +2,7 @@ import {
   Controller, Post, Body, Headers, Req, Query,
   UseGuards, BadRequestException,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { StripeService } from './stripe.service';
 import { PaymobService } from './paymob.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -9,6 +10,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
 import { PaymobCheckoutDto } from './dto/paymob-checkout.dto';
 
+@ApiTags('Payments')
 @Controller('payments')
 export class PaymentsController {
   constructor(
@@ -20,6 +22,10 @@ export class PaymentsController {
 
   @Post('stripe/checkout')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a Stripe Checkout Session' })
+  @ApiResponse({ status: 201, description: 'Returns Stripe checkout URL.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async stripeCheckout(
     @Body() dto: CreateCheckoutDto,
     @CurrentUser() user: { id: string },
@@ -36,6 +42,7 @@ export class PaymentsController {
   }
 
   @Post('stripe/webhook')
+  @ApiOperation({ summary: 'Stripe Webhook Endpoint (Do not call manually)' })
   async stripeWebhook(
     @Req() req: any,
     @Headers('stripe-signature') signature: string,
@@ -69,6 +76,10 @@ export class PaymentsController {
 
   @Post('paymob/checkout')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a PayMob Checkout Iframe URL' })
+  @ApiResponse({ status: 201, description: 'Returns PayMob iframe URL.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async paymobCheckout(@Body() dto: PaymobCheckoutDto) {
     // Step 1: Authenticate with API key
     const token = await this.paymobService.getAuthToken();
@@ -94,6 +105,7 @@ export class PaymentsController {
   }
 
   @Post('paymob/webhook')
+  @ApiOperation({ summary: 'PayMob Webhook Endpoint (Do not call manually)' })
   async paymobWebhook(@Body() body: any, @Query('hmac') hmac: string) {
     if (!hmac) {
       throw new BadRequestException('Missing hmac signature query parameter');
