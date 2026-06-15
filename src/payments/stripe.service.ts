@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 
 @Injectable()
 export class StripeService {
-  private stripe: Stripe;
+  private stripe: any;
 
   constructor(private config: ConfigService) {
     const secretKey = this.config.get<string>('STRIPE_SECRET_KEY');
@@ -39,7 +39,7 @@ export class StripeService {
     });
   }
 
-  constructWebhookEvent(payload: Buffer, signature: string): Stripe.Event {
+  constructWebhookEvent(payload: Buffer, signature: string): any {
     const webhookSecret = this.config.get<string>('STRIPE_WEBHOOK_SECRET');
     return this.stripe.webhooks.constructEvent(
       payload,
