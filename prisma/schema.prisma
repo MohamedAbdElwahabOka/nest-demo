@@ -11,15 +11,28 @@ enum Role {
   ADMIN
 }
 
+enum PaymentProvider {
+  STRIPE
+  PAYMOB
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String    @id @default(uuid())
+  email     String    @unique
   password  String
   name      String
-  role      Role     @default(USER)
+  role      Role      @default(USER)
   blogs     Blog[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  payments  Payment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("users")
 }
@@ -35,4 +48,19 @@ model Blog {
   updatedAt DateTime @updatedAt
 
   @@map("blogs")
+}
+
+model Payment {
+  id              String          @id @default(uuid())
+  amount          Int             // Amount in cents (e.g., 10000 = 100 EGP or $100)
+  currency        String          @default("usd")
+  status          PaymentStatus   @default(PENDING)
+  provider        PaymentProvider // STRIPE or PAYMOB
+  providerOrderId String?         // Stripe session ID or PayMob order ID
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@map("payments")
 }
