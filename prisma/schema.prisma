@@ -23,10 +23,16 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum OtpChannel {
+  WHATSAPP
+  SMS
+}
+
 model User {
   id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
+  email     String?   @unique
+  password  String?
+  phone     String?   @unique
   name      String
   role      Role      @default(USER)
   blogs     Blog[]
@@ -63,4 +69,18 @@ model Payment {
   updatedAt       DateTime        @updatedAt
 
   @@map("payments")
+}
+
+model OtpVerification {
+  id        String     @id @default(uuid())
+  phone     String
+  name      String
+  code      String     // 6-digit OTP code
+  channel   OtpChannel // WHATSAPP or SMS
+  expiresAt DateTime   // now() + 5 minutes
+  verified  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+
+  @@index([phone, code]) // Fast lookup during verification
+  @@map("otp_verifications")
 }

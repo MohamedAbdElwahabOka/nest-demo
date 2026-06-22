@@ -30,14 +30,14 @@ export class AuthService {
       },
     });
 
-    return this.generateToken(user.id, user.email, user.role);
+    return this.generateToken(user.id, user.email!, user.role);
   }
 
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-    if (!user) {
+    if (!user || !user.password || !user.email) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
