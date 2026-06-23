@@ -19,14 +19,24 @@ export class OtpController {
     return this.otpService.sendOtpViaWhatsapp(dto);
   }
 
-  @Post('send-otp/sms')
+  @Post('send-otp/twilio')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Send OTP verification code via SMS (Vonage)' })
-  @ApiResponse({ status: 200, description: 'OTP successfully sent via SMS.' })
+  @ApiOperation({ summary: 'Send OTP verification code via Twilio SMS' })
+  @ApiResponse({ status: 200, description: 'OTP successfully sent via Twilio.' })
+  @ApiResponse({ status: 400, description: 'Invalid input parameters.' })
+  @ApiResponse({ status: 500, description: 'Twilio API call failure.' })
+  sendOtpTwilio(@Body() dto: SendOtpDto) {
+    return this.otpService.sendOtpViaTwilio(dto);
+  }
+
+  @Post('send-otp/vonage')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Send OTP verification code via Vonage SMS' })
+  @ApiResponse({ status: 200, description: 'OTP successfully sent via Vonage.' })
   @ApiResponse({ status: 400, description: 'Invalid input parameters.' })
   @ApiResponse({ status: 500, description: 'Vonage API call failure.' })
-  sendOtpSms(@Body() dto: SendOtpDto) {
-    return this.otpService.sendOtpViaSms(dto);
+  sendOtpVonage(@Body() dto: SendOtpDto) {
+    return this.otpService.sendOtpViaVonage(dto);
   }
 
   @Post('verify-otp')

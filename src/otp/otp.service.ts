@@ -47,7 +47,7 @@ export class OtpService {
     };
   }
 
-  async sendOtpViaSms(dto: SendOtpDto) {
+  async sendOtpViaTwilio(dto: SendOtpDto) {
     const code = this.generateOtp();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiration
 
@@ -63,10 +63,34 @@ export class OtpService {
       },
     });
 
-    await this.smsService.sendOtp(dto.phone, code);
+    await this.smsService.sendTwilioOtp(dto.phone, code);
 
     return {
-      message: 'OTP sent successfully via SMS',
+      message: 'OTP sent successfully via Twilio',
+      expiresInSeconds: 300,
+    };
+  }
+
+  async sendOtpViaVonage(dto: SendOtpDto) {
+    const code = this.generateOtp();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiration
+
+    await this.cleanupExpiredOtps(dto.phone);
+
+    await this.prisma.otpVerification.create({
+      data: {
+        phone: dto.phone,
+        name: dto.name,
+        code,
+        channel: OtpChannel.SMS,
+        expiresAt,
+      },
+    });
+
+    await this.smsService.sendVonageOtp(dto.phone, code);
+
+    return {
+      message: 'OTP sent successfully via Vonage',
       expiresInSeconds: 300,
     };
   }
